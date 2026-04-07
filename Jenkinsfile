@@ -16,7 +16,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-credentials',
-                    url: 'https://github.com/YOUR_USERNAME/my-jenkins-app.git'
+                    url: 'https://github.com/Yash2471999/Roots.git'
             }
         }
 
