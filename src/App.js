@@ -13,34 +13,37 @@ const stages = [
   { id: 6, name: 'Deploy', icon: '🚀', duration: '5s', desc: 'Container running on port 3000' },
 ];
 
-function useTypewriter(text, speed = 40) {
-  const [displayed, setDisplayed] = useState('');
-  useEffect(() => {
+function useTypewriter(text, speed) {
+  var spd = speed || 40;
+  var result = useState('');
+  var displayed = result[0];
+  var setDisplayed = result[1];
+  useEffect(function() {
     setDisplayed('');
-    let i = 0;
-    const timer = setInterval(() => {
+    var i = 0;
+    var timer = setInterval(function() {
       if (i < text.length) {
         setDisplayed(text.slice(0, i + 1));
         i++;
       } else {
         clearInterval(timer);
       }
-    }, speed);
-    return () => clearInterval(timer);
-  }, [text, speed]);
+    }, spd);
+    return function() { clearInterval(timer); };
+  }, [text, spd]);
   return displayed;
 }
 
-function PipelineStage({ stage, status, delay }) {
-  const colors = {
-    success: { border: '#4ade80', bg: '#052010', text: '#4ade80', label: 'SUCCESS' },
-    running: { border: '#60a5fa', bg: '#020d1f', text: '#60a5fa', label: 'RUNNING' },
-    pending: { border: '#333', bg: '#111', text: '#555', label: 'PENDING' },
-  };
-  const c = colors[status];
-
+function PipelineStage(props) {
+  var stage = props.stage;
+  var status = props.status;
+  var delay = props.delay;
+  var successStyle = { border: '#4ade80', bg: '#052010', text: '#4ade80', label: 'SUCCESS' };
+  var runningStyle = { border: '#60a5fa', bg: '#020d1f', text: '#60a5fa', label: 'RUNNING' };
+  var pendingStyle = { border: '#333', bg: '#111', text: '#555', label: 'PENDING' };
+  var c = status === 'success' ? successStyle : status === 'running' ? runningStyle : pendingStyle;
   return (
-    <div className="stage-wrap" style={{ animationDelay: `${delay}ms` }}>
+    <div className="stage-wrap" style={{ animationDelay: delay + 'ms' }}>
       <div className="stage-card" style={{ borderColor: c.border, background: c.bg }}>
         <div className="stage-icon" style={{ color: c.text }}>{stage.icon}</div>
         <div className="stage-name" style={{ color: c.text }}>{stage.name}</div>
@@ -56,77 +59,76 @@ function PipelineStage({ stage, status, delay }) {
   );
 }
 
-function LogLine({ text, delay, type }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), delay);
-    return () => clearTimeout(t);
+function LogLine(props) {
+  var text = props.text;
+  var delay = props.delay;
+  var type = props.type;
+  var r = useState(false);
+  var visible = r[0];
+  var setVisible = r[1];
+  useEffect(function() {
+    var t = setTimeout(function() { setVisible(true); }, delay);
+    return function() { clearTimeout(t); };
   }, [delay]);
-
-  const color = type === 'success' ? '#4ade80' : type === 'error' ? '#f87171' : type === 'info' ? '#60a5fa' : '#888';
-  return visible ? <div className="log-line" style={{ color }}>{text}</div> : null;
+  var color = type === 'success' ? '#4ade80' : type === 'error' ? '#f87171' : type === 'info' ? '#60a5fa' : '#888';
+  return visible ? <div className="log-line" style={{ color: color }}>{text}</div> : null;
 }
 
 export default function App() {
-  const [currentStage, setCurrentStage] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [done, setDone] = useState(false);
-  const [showLogs, setShowLogs] = useState(false);
-  const [tick, setTick] = useState(0);
+  var s1 = useState(0); var currentStage = s1[0]; var setCurrentStage = s1[1];
+  var s2 = useState(false); var running = s2[0]; var setRunning = s2[1];
+  var s3 = useState(false); var done = s3[0]; var setDone = s3[1];
+  var s4 = useState(false); var showLogs = s4[0]; var setShowLogs = s4[1];
+  var s5 = useState(0); var tick = s5[0]; var setTick = s5[1];
+  var headline = useTypewriter('Jenkins CI/CD Pipeline', 60);
 
-  const headline = useTypewriter('Jenkins CI/CD Pipeline', 60);
-
-  useEffect(() => {
-    const t = setInterval(() => setTick(x => x + 1), 1000);
-    return () => clearInterval(t);
+  useEffect(function() {
+    var t = setInterval(function() { setTick(function(x) { return x + 1; }); }, 1000);
+    return function() { clearInterval(t); };
   }, []);
 
-  const runPipeline = () => {
+  function runPipeline() {
     if (running || done) return;
     setRunning(true);
     setCurrentStage(1);
     setShowLogs(true);
-
-    stages.forEach((_, i) => {
-      setTimeout(() => {
+    stages.forEach(function(_, i) {
+      setTimeout(function() {
         setCurrentStage(i + 2);
-        if (i === stages.length - 1) {
-          setDone(true);
-          setRunning(false);
-        }
+        if (i === stages.length - 1) { setDone(true); setRunning(false); }
       }, (i + 1) * 1800);
     });
-  };
+  }
 
-  const reset = () => {
-    setCurrentStage(0);
-    setRunning(false);
-    setDone(false);
-    setShowLogs(false);
-  };
+  function reset() {
+    setCurrentStage(0); setRunning(false); setDone(false); setShowLogs(false);
+  }
 
-  const getStatus = (stageId) => {
+  function getStatus(stageId) {
     if (stageId < currentStage) return 'success';
     if (stageId === currentStage) return 'running';
     return 'pending';
-  };
+  }
 
-  const logs = [
-    { text: `[${BUILD_TIME}] Pipeline started — Build #${BUILD_NUMBER}`, type: 'info', delay: 200 },
-    { text: '[Checkout] Cloning https://github.com/user/my-jenkins-app.git', type: 'normal', delay: 800 },
+  var logs = [
+    { text: '[' + BUILD_TIME + '] Pipeline started — Build #' + BUILD_NUMBER, type: 'info', delay: 200 },
+    { text: '[Checkout] Cloning https://github.com/Yash2471999/Roots.git', type: 'normal', delay: 800 },
     { text: '[Checkout] Branch: refs/remotes/origin/main', type: 'normal', delay: 1200 },
     { text: '[Install] Running: npm install', type: 'normal', delay: 2000 },
-    { text: '[Install] added 1423 packages in 44s', type: 'success', delay: 3600 },
-    { text: '[Test] PASS src/App.test.js', type: 'success', delay: 5200 },
-    { text: '[Test] Test Suites: 1 passed, 1 total', type: 'success', delay: 5600 },
+    { text: '[Install] added 1345 packages in 44s', type: 'success', delay: 3600 },
+    { text: '[Test] Skipping tests...', type: 'normal', delay: 5200 },
     { text: '[Build] Creating optimized production build...', type: 'normal', delay: 7000 },
     { text: '[Build] Compiled successfully in 28.4s', type: 'success', delay: 9000 },
     { text: '[Docker] Building image my-react-app:' + BUILD_NUMBER, type: 'info', delay: 10800 },
-    { text: '[Docker] Successfully built & tagged', type: 'success', delay: 12400 },
+    { text: '[Docker] Successfully built and tagged', type: 'success', delay: 12400 },
     { text: '[Deploy] Stopping old container...', type: 'normal', delay: 14000 },
     { text: '[Deploy] Container react-app started on port 3000', type: 'success', delay: 15600 },
-    { text: '✓ Pipeline completed successfully!', type: 'success', delay: 16200 },
+    { text: 'Pipeline completed successfully!', type: 'success', delay: 16200 },
   ];
+
+  var statusText = done ? 'SUCCESS' : running ? 'RUNNING' : 'IDLE';
+  var statusClass = 'status-dot ' + (done ? 'success' : running ? 'running' : 'idle');
+  var pct = done ? 100 : running ? Math.round((currentStage / stages.length) * 100) : 0;
 
   return (
     <div className="app">
@@ -142,60 +144,53 @@ export default function App() {
             <span className="meta-dot">·</span>
             <span className="meta-item">main</span>
             <span className="meta-dot">·</span>
-            <span className={`status-dot ${done ? 'success' : running ? 'running' : 'idle'}`}></span>
-            <span className="meta-item">{done ? 'SUCCESS' : running ? 'RUNNING' : 'IDLE'}</span>
+            <span className={statusClass}></span>
+            <span className="meta-item">{statusText}</span>
           </div>
         </div>
-
         <h1 className="headline">{headline}<span className="cursor">_</span></h1>
-        <p className="subline">GitHub → Jenkins → Docker → Deploy</p>
-
+        <p className="subline">GitHub to Jenkins to Docker to Deploy</p>
         <div className="uptime-bar">
           <span className="uptime-label">PIPELINE</span>
           <div className="uptime-track">
-            <div className="uptime-fill" style={{ width: done ? '100%' : running ? `${(currentStage / stages.length) * 100}%` : '0%' }}></div>
+            <div className="uptime-fill" style={{ width: pct + '%' }}></div>
           </div>
-          <span className="uptime-pct">
-            {done ? '100' : running ? Math.round((currentStage / stages.length) * 100) : '0'}%
-          </span>
+          <span className="uptime-pct">{pct}%</span>
         </div>
       </header>
 
       <main className="main">
         <section className="pipeline-section">
           <div className="section-header">
-            <span className="section-tag">
+            <span className="section-tag">pipeline stages</span>
             <span className="section-time">tick: {tick}s</span>
           </div>
           <div className="stages-grid">
-            {stages.map((stage, i) => (
-              <PipelineStage
-                key={stage.id}
-                stage={stage}
-                status={getStatus(stage.id)}
-                delay={i * 100}
-              />
-            ))}
+            {stages.map(function(stage, i) {
+              return (
+                <PipelineStage key={stage.id} stage={stage} status={getStatus(stage.id)} delay={i * 100} />
+              );
+            })}
           </div>
         </section>
 
         <div className="controls">
           <button
-            className={`run-btn ${running ? 'running' : done ? 'done' : ''}`}
+            className={'run-btn' + (running ? ' running' : done ? ' done' : '')}
             onClick={runPipeline}
             disabled={running || done}
           >
-            {running ? '⟳  PIPELINE RUNNING...' : done ? '✓  BUILD SUCCESSFUL' : '▶  RUN PIPELINE'}
+            {running ? 'PIPELINE RUNNING...' : done ? 'BUILD SUCCESSFUL' : 'RUN PIPELINE'}
           </button>
           {(done || currentStage > 0) && (
-            <button className="reset-btn" onClick={reset}>↺ RESET</button>
+            <button className="reset-btn" onClick={reset}>RESET</button>
           )}
         </div>
 
         {showLogs && (
           <section className="logs-section">
             <div className="section-header">
-              <span className="section-tag">
+              <span className="section-tag">console output</span>
               {done && <span className="success-tag">BUILD SUCCESS</span>}
             </div>
             <div className="log-terminal">
@@ -206,9 +201,9 @@ export default function App() {
                 <span className="t-title">jenkins-console — build #{BUILD_NUMBER}</span>
               </div>
               <div className="log-body">
-                {logs.map((log, i) => (
-                  <LogLine key={i} text={log.text} delay={log.delay} type={log.type} />
-                ))}
+                {logs.map(function(log, i) {
+                  return <LogLine key={i} text={log.text} delay={log.delay} type={log.type} />;
+                })}
               </div>
             </div>
           </section>
@@ -217,24 +212,24 @@ export default function App() {
         <section className="info-section">
           <div className="info-grid">
             <div className="info-card">
-              <div className="info-label">
+              <div className="info-label">environment</div>
               <div className="info-row"><span>NODE</span><span className="accent">18.x LTS</span></div>
               <div className="info-row"><span>DOCKER</span><span className="accent">latest</span></div>
               <div className="info-row"><span>JENKINS</span><span className="accent">2.x LTS</span></div>
               <div className="info-row"><span>OS</span><span className="accent">Ubuntu 24.04</span></div>
             </div>
             <div className="info-card">
-              <div className="info-label">// repository</div>
+              <div className="info-label">repository</div>
               <div className="info-row"><span>BRANCH</span><span className="accent2">main</span></div>
               <div className="info-row"><span>TRIGGER</span><span className="accent2">git push</span></div>
               <div className="info-row"><span>WEBHOOK</span><span className="accent2">:8080/github-webhook/</span></div>
               <div className="info-row"><span>SCM</span><span className="accent2">GitHub</span></div>
             </div>
             <div className="info-card">
-              <div className="info-label">
+              <div className="info-label">deployment</div>
               <div className="info-row"><span>PORT</span><span className="accent">3000</span></div>
               <div className="info-row"><span>IMAGE</span><span className="accent">my-react-app</span></div>
-              <div className="info-row"><span>SERVER</span><span className="accent">EC2 (ap-south-1)</span></div>
+              <div className="info-row"><span>SERVER</span><span className="accent">EC2 ap-south-1</span></div>
               <div className="info-row"><span>BASE</span><span className="accent">nginx:alpine</span></div>
             </div>
           </div>
