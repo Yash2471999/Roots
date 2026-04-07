@@ -164,7 +164,7 @@ export default function App() {
       <main className="main">
         <section className="pipeline-section">
           <div className="section-header">
-            <span className="section-tag">// pipeline stages</span>
+            <span className="section-tag">
             <span className="section-time">tick: {tick}s</span>
           </div>
           <div className="stages-grid">
@@ -195,7 +195,7 @@ export default function App() {
         {showLogs && (
           <section className="logs-section">
             <div className="section-header">
-              <span className="section-tag">// console output</span>
+              <span className="section-tag">
               {done && <span className="success-tag">BUILD SUCCESS</span>}
             </div>
             <div className="log-terminal">
@@ -217,7 +217,7 @@ export default function App() {
         <section className="info-section">
           <div className="info-grid">
             <div className="info-card">
-              <div className="info-label">// environment</div>
+              <div className="info-label">
               <div className="info-row"><span>NODE</span><span className="accent">18.x LTS</span></div>
               <div className="info-row"><span>DOCKER</span><span className="accent">latest</span></div>
               <div className="info-row"><span>JENKINS</span><span className="accent">2.x LTS</span></div>
@@ -231,7 +231,7 @@ export default function App() {
               <div className="info-row"><span>SCM</span><span className="accent2">GitHub</span></div>
             </div>
             <div className="info-card">
-              <div className="info-label">// deployment</div>
+              <div className="info-label">
               <div className="info-row"><span>PORT</span><span className="accent">3000</span></div>
               <div className="info-row"><span>IMAGE</span><span className="accent">my-react-app</span></div>
               <div className="info-row"><span>SERVER</span><span className="accent">EC2 (ap-south-1)</span></div>
